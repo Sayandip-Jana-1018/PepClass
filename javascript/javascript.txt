@@ -1,0 +1,375 @@
+📘 COMPLETE JAVASCRIPT CLASS NOTES (From Your Files)
+1️⃣ Basic Variables & Console Output
+
+📄 File: 
+
+1
+
+let a = 10
+let b = 20
+let c = a + b
+console.log(c)
+
+🔹 Theory
+✅ let
+
+Used to declare variables (block scoped).
+
+✅ console.log()
+
+Used to print output in the console.
+
+✅ Arithmetic Addition
+
+c = a + b adds values stored in variables.
+
+🔎 Step-by-Step Execution
+Line	Explanation
+let a = 10	Variable a is created and assigned 10
+let b = 20	Variable b is created and assigned 20
+let c = a + b	Adds 10 + 20 → stores 30
+console.log(c)	Prints 30
+2️⃣ Strings & Template Literals
+
+📄 File: 
+
+2
+
+name = "John"
+console.log("Hello " + name)
+console.log(`Hello ${name}`)
+
+🔹 Theory
+✅ String Concatenation
+"Hello " + name
+
+✅ Template Literals (Modern JS)
+`Hello ${name}`
+
+
+✔ Uses backticks
+✔ Supports variable interpolation
+✔ Cleaner and modern
+
+3️⃣ Operators in JavaScript
+
+📄 File: 
+
+3
+
+🔹 Arithmetic Operators
+a+b
+a-b
+a*b
+a/b
+a%b
+a**b
+
+Operator	Meaning
++	Addition
+-	Subtraction
+*	Multiplication
+/	Division
+%	Modulus
+**	Power
+🔹 Comparison Operators
+console.log(x==y)
+console.log(x===y)
+
+⚠ Difference Between == and ===
+Operator	Meaning
+==	Compares value only
+===	Compares value AND datatype
+
+Example:
+
+let x = "10"
+let y = 10
+
+
+x == y → true
+x === y → false
+
+🔹 Logical Operators
+Operator	Meaning
+&&	AND
+	
+!	NOT
+
+⚠ Important:
+
+console.log(!a>b)
+
+
+This is interpreted as:
+
+(!a) > b
+
+
+Due to operator precedence.
+
+4️⃣ Conditional Statements
+
+📄 File: 
+
+4
+
+if (a > b)
+    console.log("a is greater");
+else if (a < b)
+    console.log("b is greater");
+else
+    console.log("equal");
+
+🔹 Theory
+Syntax
+if(condition) { }
+else if(condition) { }
+else { }
+
+
+✔ Used for decision making
+✔ Executes based on boolean condition
+
+5️⃣ While Loop
+
+📄 File: 
+
+5
+
+let i = 1
+while (i<=5){
+    i++
+    if (i==3){
+        continue
+    }
+    console.log(i)
+}
+
+🔹 Theory
+while loop
+
+Runs until condition becomes false.
+
+continue
+
+Skips current iteration.
+
+break
+
+Stops loop completely.
+
+6️⃣ For Loop
+
+📄 File: 
+
+6
+
+for(let i=1;i<=5;i++){
+    if (i==3){
+        continue
+    }
+    console.log(i)
+}
+
+Structure
+for(initialization; condition; increment)
+
+Printing multiples of 5
+for(let i=5;i<=30;i+=5)
+
+7️⃣ Functions
+
+📄 File: 
+
+7
+
+function add(x,y){
+    return x+y
+}
+let result = add(4,5)
+
+🔹 Theory
+Function with Return
+
+Returns value to caller.
+
+Parameters
+
+x, y → inputs
+
+8️⃣ var vs let & Scope
+
+📄 File: 
+
+8
+
+var a = 10
+function f1(){
+    var a = 20
+    if (3>1){
+        var a = 30
+        console.log(a)
+    }
+    console.log(a)
+}
+f1()
+console.log(a)
+
+🔹 Scope Types
+Keyword	Scope
+var	Function scoped
+let	Block scoped
+const	Block scoped
+
+⚠ Important:
+var ignores block scope inside if.
+
+9️⃣ Data Types & Type Conversion
+
+📄 File: 
+
+9
+
+Primitive Types
+
+number
+
+string
+
+boolean
+
+null
+
+undefined
+
+typeof
+console.log(typeof a)
+
+Type Conversion
+Number(a)
+String(a)
+Boolean(a)
+
+🔟 Functions as Variables & Arrow Functions
+
+📄 File: 
+
+10
+
+const add = (x, y) => {
+ return x+y
+};
+
+🔹 Arrow Function
+const functionName = (params) => { }
+
+1️⃣1️⃣ Short Arrow Functions
+
+📄 File: 
+
+11
+
+const sqr = a => a * a;
+
+
+If only one expression → no return needed.
+
+1️⃣2️⃣ Objects & Spread Operator
+
+📄 File: 
+
+12
+
+const student = { name:"John", age:21 }
+const obj = {...student,city:"NYC"}
+
+🔹 Object
+
+Stores key-value pairs.
+
+🔹 Spread Operator ...
+
+Copies properties.
+
+1️⃣3️⃣ Returning Object from Arrow Function
+
+📄 File: 
+
+13
+
+const items = () => ({name: "John"})
+
+
+⚠ Parentheses required around object.
+
+1️⃣4️⃣ Arrays & Spread
+
+📄 File: 
+
+14
+
+const arr = [...names,"Suresh"]
+
+
+Creates new array without modifying original.
+
+1️⃣5️⃣ Real Example – Add to Cart
+
+📄 File: 
+
+15
+
+cart = [...cart,"iphone"]
+
+
+✔ Immutable update
+✔ React-style pattern
+
+1️⃣6️⃣ Complex Cart + MongoDB
+
+📄 File: 
+
+16
+
+cart = [...cart,{name:"iphone",price:45000,qty:1}]
+
+🔹 Order Object Structure
+{
+ email,
+ items,
+ orderValue,
+ status
+}
+
+MongoDB Concepts
+
+insertOne()
+
+insertMany()
+
+aggregate()
+
+$match
+
+$project
+
+1️⃣7️⃣ Array Iteration & Callbacks
+
+📄 File: 
+
+17
+
+products.forEach((product) => {
+    console.log(product)
+})
+
+🔹 forEach
+
+Executes function for each element.
+
+🔹 Callback Function
+
+Function passed as argument.
+
+greet(() => console.log("Hello"))
