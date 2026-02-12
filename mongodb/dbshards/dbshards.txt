@@ -1,0 +1,389 @@
+/*********************************************************************
+ MONGODB SHARDED CLUSTER SETUP (LOCAL SYSTEM)
+ Author: Sayan
+ Purpose: Setup Config Servers, Shards, and Mongos Router
+**********************************************************************/
+
+/*
+=====================================================================
+ STEP 1: CREATE FOLDERS (DATA DIRECTORIES)
+=====================================================================
+
+Create a main folder: dbshards
+
+Inside dbshards, create:
+
+1. conf   → Config Server 1
+2. confr  → Config Server 2
+3. s1     → Shard1 Primary
+4. s1r    → Shard1 Secondary
+5. s2     → Shard2 Primary
+6. s2r    → Shard2 Secondary
+
+Each folder represents one MongoDB server.
+*/
+
+
+/*
+=====================================================================
+ STEP 2: START CONFIG SERVERS (METADATA SERVERS)
+=====================================================================
+
+Config servers store metadata:
+- Which shard has which data
+- Chunk info
+- Cluster configuration
+*/
+
+mongod --configsvr --replSet cf \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\conf" \
+--port 27018
+
+mongod --configsvr --replSet cf \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\confr" \
+--port 27019
+
+
+/*
+=====================================================================
+ STEP 3: INITIATE CONFIG SERVER REPLICA SET
+=====================================================================
+*/
+
+mongosh --port 27018
+
+rs.initiate({
+  _id: "cf",
+  members: [
+    { _id: 0, host: "localhost:27018" },
+    { _id: 1, host: "localhost:27019" }
+  ]
+})
+
+rs.config()
+rs.status()
+
+
+/*
+=====================================================================
+ STEP 4: START SHARD 1 (REPLICA SET)
+=====================================================================
+*/
+
+mongod --shardsvr --replSet s1 \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\s1" \
+--port 27020
+
+mongod --shardsvr --replSet s1 \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\s1r" \
+--port 27021
+
+
+/*
+=====================================================================
+ STEP 5: INITIATE SHARD 1 REPLICA SET
+=====================================================================
+*/
+
+mongosh --port 27020
+
+rs.initiate({
+  _id: "s1",
+  members: [
+    { _id: 0, host: "localhost:27020" },
+    { _id: 1, host: "localhost:27021" }
+  ]
+})
+
+rs.status()
+
+
+/*
+=====================================================================
+ STEP 6: START SHARD 2 (REPLICA SET)
+=====================================================================
+*/
+
+mongod --shardsvr --replSet s2 \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\s2" \
+--port 27022
+
+mongod --shardsvr --replSet s2 \
+--dbpath "C:\Users\Sayan\Desktop\PepMern\dbshards\s2r" \
+--port 27023
+
+
+/*
+=====================================================================
+ STEP 7: INITIATE SHARD 2 REPLICA SET
+=====================================================================
+*/
+
+mongosh --port 27022
+
+rs.initiate({
+  _id: "s2",
+  members: [
+    { _id: 0, host: "localhost:27022" },
+    { _id: 1, host: "localhost:27023" }
+  ]
+})
+
+rs.status()
+
+
+/*
+=====================================================================
+ STEP 8: START MONGOS (QUERY ROUTER)
+=====================================================================
+
+Mongos connects ONLY to Config Servers
+because config servers know cluster metadata.
+*/
+
+mongos --configdb cf/localhost:27018,localhost:27019 \
+--port 27050
+
+
+/*
+=====================================================================
+ STEP 9: CONNECT TO MONGOS
+=====================================================================
+*/
+
+mongosh --port 27050
+
+
+/*
+=====================================================================
+ STEP 10: ADD SHARDS TO CLUSTER
+=====================================================================
+*/
+
+sh.addShard("s1/localhost:27020,localhost:27021")
+sh.addShard("s2/localhost:27022,localhost:27023")
+
+sh.status()
+
+
+/*
+=====================================================================
+ STEP 11: CREATE DATABASE
+=====================================================================
+*/
+
+use icici
+
+
+/*
+=====================================================================
+ STEP 12: ENABLE SHARDING ON DATABASE
+=====================================================================
+*/
+
+sh.enableSharding("icici")
+
+
+/*
+=====================================================================
+ STEP 13: INSERT SAMPLE DATA
+=====================================================================
+*/
+
+db.customers.insertOne({
+  name: "John Doe",
+  email: "john@gmail.com",
+  emp_id: 1
+})
+
+
+/*
+=====================================================================
+ STEP 14: CREATE INDEX ON SHARD KEY
+=====================================================================
+
+MongoDB requires an index before sharding.
+*/
+
+db.customers.createIndex({ emp_id: 1 })
+
+
+/*
+=====================================================================
+ STEP 15: SHARD THE COLLECTION
+=====================================================================
+*/
+
+sh.shardCollection("icici.customers", { emp_id: 1 })
+
+
+/*
+=====================================================================
+ STEP 16: INSERT BULK DATA
+=====================================================================
+*/
+
+for (let i = 2; i <= 10000; i++) {
+  db.customers.insertOne({
+    name: `Customer ${i}`,
+    email: `customer${i}@gmail.com`,
+    emp_id: i
+  })
+}
+
+
+/*
+=====================================================================
+ STEP 17: VERIFY TOTAL DOCUMENTS
+=====================================================================
+*/
+
+db.customers.countDocuments()
+
+
+/*
+=====================================================================
+ STEP 18: CHECK DATA DISTRIBUTION (MongoDB 7+)
+=====================================================================
+*/
+
+use config
+db.chunks.find({ ns: "icici.customers" }).pretty()
+
+
+/*
+=====================================================================
+ STEP 19: NORMAL QUERY (MONGOS AUTO ROUTING)
+=====================================================================
+*/
+
+use icici
+db.customers.find({ emp_id: 12345 })
+
+
+/*
+=====================================================================
+ IMPORTANT ISSUE OBSERVED DURING SHARDING (REAL LEARNING)
+=====================================================================
+
+PROBLEM:
+--------
+After sharding the collection, all documents were present on ONLY ONE
+shard (s2), while shard s1 contained 0 documents.
+
+This happened even though:
+- Sharding was enabled
+- Shard key index existed
+- Mongos and balancer were running correctly
+
+
+WHY THIS HAPPENED:
+------------------
+1. Data was inserted BEFORE MongoDB had a chance to split chunks.
+2. The shard key used was MONOTONIC (emp_id: 1,2,3,4,...).
+3. MongoDB initially created only ONE large chunk.
+4. Since no chunk was split, the balancer had nothing to migrate.
+5. All data stayed on the primary shard (s2).
+
+IMPORTANT NOTE:
+---------------
+MongoDB does NOT redistribute existing data automatically
+unless chunk splits occur.
+
+
+WHAT WE DID TO FIX IT (MANUAL SOLUTION):
+---------------------------------------
+
+From mongos (port 27050):
+
+// Step 1: Force a chunk split
+sh.splitAt("icici.customers", { emp_id: 5000 })
+
+// Step 2: Move one chunk to shard s1
+sh.moveChunk(
+  "icici.customers",
+  { emp_id: 1 },
+  "s1"
+)
+
+RESULT:
+-------
+- Shard s1 → ~4999 documents
+- Shard s2 → ~5001 documents
+
+This confirms data distribution is now correct.
+
+
+HOW TO AVOID THIS PROBLEM NEXT TIME (BEST PRACTICE):
+----------------------------------------------------
+
+❌ WRONG APPROACH (WHAT CAUSED THE ISSUE):
+-----------------------------------------
+
+// Insert data first
+db.customers.insertMany([...])
+
+// Then shard with ranged / sequential key
+sh.shardCollection("icici.customers", { emp_id: 1 })
+
+
+✅ CORRECT APPROACH (RECOMMENDED FOR PRODUCTION):
+------------------------------------------------
+
+STEP 1: Enable sharding FIRST
+sh.enableSharding("icici")
+
+STEP 2: Create index on shard key
+db.customers.createIndex({ emp_id: "hashed" })
+
+STEP 3: Shard collection using HASHED shard key
+sh.shardCollection("icici.customers", { emp_id: "hashed" })
+
+STEP 4: Insert data AFTER sharding
+for (let i = 1; i <= 10000; i++) {
+  db.customers.insertOne({
+    name: `Customer ${i}`,
+    email: `customer${i}@gmail.com`,
+    emp_id: i
+  })
+}
+
+
+WHY HASHED SHARD KEY IS BETTER:
+-------------------------------
+- Prevents hot shards
+- Even distribution across shards
+- Automatic chunk splits
+- No manual balancing required
+- Ideal for high-write workloads
+
+REAL-WORLD PRACTICE:
+--------------------
+Most production systems use HASHED shard keys
+unless range-based queries are explicitly required.
+
+=====================================================================
+*/
+
+/*
+=====================================================================
+ ARCHITECTURE SUMMARY
+=====================================================================
+
+Client
+   |
+ Mongos (27050)
+   |
+-----------------------
+|                     |
+Shard1               Shard2
+(27020/21)           (27022/23)
+
+Each shard = Replica Set
+Config servers store metadata
+Balancer distributes chunks
+
+=====================================================================
+ END OF FILE
+=====================================================================
+*/
