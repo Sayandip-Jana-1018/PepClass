@@ -174,15 +174,25 @@ function displayCart() {
 // CALCULATE TOTAL
 // ===============================
 
+// function calculateTotal() {
+
+//   let total = 0;
+
+//   for (let products of cart) {
+//     total += products.price * products.quantity;
+//   }
+
+//   return total;
+// }
+
 function calculateTotal() {
 
-  let total = 0;
+  return cart.reduce((total, products) => {
 
-  for (let products of cart) {
-    total += products.price * products.quantity;
-  }
+    return total + (products.price * products.quantity);
 
-  return total;
+  }, 0);
+
 }
 
 // ===============================
