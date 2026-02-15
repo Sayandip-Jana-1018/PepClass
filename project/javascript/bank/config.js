@@ -1,0 +1,5 @@
+module.exports = {
+  SAVINGS_MIN_BALANCE: 1000,
+  SAVINGS_INTEREST: 0.04,
+  LOAN_MULTIPLIER: 5
+};
