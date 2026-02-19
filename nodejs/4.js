@@ -39,15 +39,8 @@ app.get("/x/:a/y/:b/z/:c", (req, res) => {
     res.send(`Sum = ${sum}`);
 });
 
-app.get("/:a/4/:b/5/:c/6", (req, res) => {
-
-    const n1 = 4;
-    const n2 = 5;
-    const n3 = 6;
-
-    const sum = n1 + n2 + n3;
-
-    res.send(`Sum = ${sum}`);
+app.get(":a/:b/:c", (req, res) => {
+    res.send("Hello Students");
 });
 
 
