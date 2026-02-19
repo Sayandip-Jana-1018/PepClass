@@ -4,6 +4,7 @@ function user() {
         return password === inputPassword;
     }
     return checkPassword;
+    return checkPassword === validPassword + 23;
 }
 
 const checkPassword = user()
