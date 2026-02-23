@@ -1,16 +1,27 @@
 {
-  "name": "nodejs",
+  "name": "nodejs-1",
+  "type": "module",
   "version": "1.0.0",
-  "description": "",
-  "main": "1.js",
+  "main": "index1.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nairx/nodejs-1.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "bugs": {
+    "url": "https://github.com/nairx/nodejs-1/issues"
+  },
+  "homepage": "https://github.com/nairx/nodejs-1#readme",
+  "description": "",
   "dependencies": {
-    "express": "^5.2.1"
+    "bcrypt": "^6.0.0",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
   }
 }

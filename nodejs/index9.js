@@ -3,8 +3,7 @@ const app = express();
 app.listen(8080);
 
 const logger = (req, res, next) => {
-    
-  req.message = "This is logger function";
+    req.message = "This is logger function";
   //   console.log(req.url);
   next();
 };
@@ -18,3 +17,5 @@ app.get("/home", (req, res) => {
   console.log(req.message);
   res.json(req.url);
 });
+
+
