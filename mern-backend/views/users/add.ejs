@@ -6,11 +6,20 @@
     <title>Document</title>
   </head>
   <body>
-    <h1>User Signup Form</h1>
-    <form action="/users/saveuser" method="POST">
+    <h1>Add User</h1>
+    <form action="/users/add/" method="POST">
       <p><input type="text" name="name" placeholder="Name" /></p>
       <p><input type="text" name="email" placeholder="Email" /></p>
-      <p><input type="password" name="password" placeholder="Password" /></p>
+      <p>
+        <input type="password" name="password" placeholder="New Password" />
+      </p>
+      <p>
+        <select name="role">
+            <option value="">--Select Role--</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </p>
       <p><button>Submit</button></p>
     </form>
   </body>
